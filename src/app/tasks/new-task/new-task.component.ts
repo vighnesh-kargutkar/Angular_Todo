@@ -1,35 +1,37 @@
-import { Component, Output ,EventEmitter, signal, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Task } from './new-task.model';
+
+import { type NewTaskData } from '../task/task.model';
+import { TasksService } from '../tasks.service';
 
 @Component({
   selector: 'app-new-task',
   standalone: true,
   imports: [FormsModule],
   templateUrl: './new-task.component.html',
-  styleUrl: './new-task.component.css'
+  styleUrl: './new-task.component.css',
 })
 export class NewTaskComponent {
-  @Output() cancle = new EventEmitter<void>();
-  @Output() AddTask = new EventEmitter();
-  @Input() userId!: string;
-  enteredTitle = ''
-  enteredSummary = ''
-  enteredDueDate = ''
-  onCancle(){
-    console.log('cancle')
-    this.cancle.emit()
+  @Input({ required: true }) userId!: string;
+  @Output() close = new EventEmitter<void>();
+  enteredTitle = '';
+  enteredSummary = '';
+  enteredDate = '';
+  private tasksService = inject(TasksService);
+
+  onCancel() {
+    this.close.emit();
   }
-  onSubmit(){
-    console.log(this.userId);
-    this.AddTask.emit(
+
+  onSubmit() {
+    this.tasksService.addTask(
       {
         title: this.enteredTitle,
         summary: this.enteredSummary,
-        dueDate: this.enteredDueDate,
-        userId: this.userId,
-        id: Math.random().toString()
-      }
-    )
+        date: this.enteredDate,
+      },
+      this.userId
+    );
+    this.close.emit();
   }
 }
